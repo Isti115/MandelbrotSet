@@ -4,8 +4,8 @@ body {
 }
 
 .container {
-  padding: 10px 10%;
-  /*border: solid black 3px;*/
+  padding: 0px;
+  margin: 0px;
   
   text-align: center;
 }
@@ -19,6 +19,12 @@ body {
   
   background-color: #ea7676;
   border-top-left-radius: 10px;
+}
+
+.noselect {
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
 }
 
 #config {

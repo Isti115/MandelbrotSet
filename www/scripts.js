@@ -25,6 +25,11 @@ var canvas, context;
 
 var scale = 2;
 
+var area = {};
+area.top = 1.5, area.right = 1.5, area.bottom = -1.5, area.left = -2;
+area = {left: -1.5, right: -0.5, top: 1.5, bottom: 0.5};
+area = {left: -3, right: 3, top: -3, bottom: 3};
+
 function load() {  
   var configDiv = document.getElementById("config");
   
@@ -64,6 +69,15 @@ function dragMove(e) {
 
 function dragEnd(e) {
   output.removeEventListener("mousemove", dragMove, false);
+  
+  var newArea = {};
+  
+  newArea.left = area.left + ((area.right - area.left) * (drag.left / canvas.width));
+  newArea.right = area.left + ((area.right - area.left) * (drag.right / canvas.width));
+  newArea.top = area.top + ((area.bottom - area.top) * (drag.top / canvas.width));
+  newArea.bottom = area.top + ((area.bottom - area.top) * (drag.bottom / canvas.width));
+  
+  area = newArea;
 }
 
 function example() {
@@ -84,20 +98,23 @@ function validate() {
 }
 
 function process() {
-  var top = 1.5, right = 1.5, bottom = -1.5, left = -2;
-  
   var workerCount = document.getElementById("workerCountInput").value;
-  console.log(workerCount);
+  // console.log(workerCount);
+  
+  console.log(area);
   
   for (var y = 0; y < canvas.height; y += scale) {
     for (var x = 0; x < canvas.width; x += scale) {
       
-      var currentValue = getValue(
-                                  left + ((right - left) * (x / canvas.width)),
-                                  top  + ((bottom - top) * (y / canvas.height))
-                                 );
+      var currentPosition = {};
+      currentPosition.x = area.left + ((area.right - area.left) * (x / canvas.width));
+      currentPosition.y = area.top  + ((area.bottom - area.top) * (y / canvas.height));
       
-      context.fillStyle = "#00" + (currentValue / 30 * 9999);
+      // console.log(currentPosition);
+      
+      var currentValue = getValue(currentPosition.x, currentPosition.y);
+      
+      context.fillStyle = "#00" + Math.floor((currentValue / 30 * 9999));
       
       context.fillRect(x, y, scale, scale);
     }
