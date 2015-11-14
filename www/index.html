@@ -23,7 +23,16 @@
           <tr><th>Parameter</th><th>Value</th></tr>
         </thead>
         <tr>
-          <td>Worker count:</td><td><input id="workerCountInput" type="text" value="1"></td>
+          <td>Worker count:</td><td><input class="configInput" id="workerCountInput" type="text" value="1"></td>
+        </tr>
+        <tr>
+          <td>Maximum iterations:</td><td><input class="configInput" id="maxIterationsInput" type="text" value="30"></td>
+        </tr>
+        <tr>
+          <td>Maximum length:</td><td><input class="configInput" id="maxLengthInput" type="text" value="4"></td>
+        </tr>
+        <tr>
+          <td>Scale:</td><td><input class="configInput" id="scaleInput" type="range" min="1" max="10" value="2"></td>
         </tr>
       </table>
       
@@ -35,7 +44,6 @@
     <h1 class="noselect">Discrete Mathematics - Mandelbrot Set</h1>
     
     <div id="output">
-      <!-- <canvas id="outputCanvas" width="750" height="500"></canvas> -->
       <canvas id="outputCanvas"></canvas>
     </div>
   </div>

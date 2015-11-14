@@ -5,9 +5,6 @@ window.addEventListener("load", load, false);
 var examples = [
   //Always TRUE
   "{A} or not {A}",
-  "({A} or {B}) and (not {B}) => {A}",
-  "(not ({A} <-> {B})) <-> (({A} or {B}) and not ({A} and {B}))",
-  "(({A} <-> {B}) and ({B} <-> {C})) => (    {A} <-> {C})",
   
   //Mixed
   "{this} or {that}",
@@ -23,12 +20,17 @@ var drag;
 
 var canvas, context;
 
-var scale = 1;
+var workerCount = 1;
+var maxIterations = 30;
+var maxLength = 4;
+var scale = 2;
 
 var area = {};
 area.top = 1.5, area.right = 1.5, area.bottom = -1.5, area.left = -2;
 area = {left: -1.5, right: -0.5, top: 1.5, bottom: 0.5};
 area = {left: -3, right: 3, top: -3, bottom: 3};
+
+var tempImage = new Image();
 
 function load() {  
   var configDiv = document.getElementById("config");
@@ -44,6 +46,12 @@ function load() {
   document.getElementById("processButton").addEventListener("click", process, false);
   document.getElementById("exampleButton").addEventListener("click", example, false);
   
+  var configInputs = document.getElementsByClassName("configInput");
+  
+  for (var i = 0; i < configInputs.length; i++) {
+    configInputs[i].addEventListener("change", configUpdate, false);
+  }
+  
   output = document.getElementById("output");
   output.addEventListener("mousedown", dragStart, false);
   
@@ -55,10 +63,19 @@ function load() {
   context = canvas.getContext("2d");
 }
 
+function configUpdate() {
+  workerCount = parseInt(document.getElementById("workerCountInput").value);
+  maxIterations = parseInt(document.getElementById("maxIterationsInput").value);
+  maxLength = parseInt(document.getElementById("maxLengthInput").value);
+  scale = parseInt(document.getElementById("scaleInput").value);
+}
+
 function dragStart(e) {
   if (e.button != 0) {
     return;
   }
+  
+  tempImage.src = canvas.toDataURL();
   
   output.addEventListener("mousemove", dragMove, false);
   output.addEventListener("mouseup", dragEnd, false);
@@ -68,6 +85,7 @@ function dragStart(e) {
 function dragMove(e) {
   drag.right = e.clientX;
   drag.bottom = e.clientY;
+  context.drawImage(tempImage, 0, 0, canvas.width, canvas.height);
   context.strokeRect(drag.left, drag.top, drag.right - drag.left, drag.bottom - drag.top);
 }
 
@@ -76,6 +94,10 @@ function dragEnd(e) {
   output.removeEventListener("mouseup", dragEnd, false);
   
   // console.log(drag);
+  
+  if (Math.abs(drag.right - drag.left) < 25 || Math.abs(drag.bottom - drag.top) < 25) {
+    return;
+  }
   
   var dragResults = {};
   dragResults.left = drag.left < drag.right ? drag.left : drag.right;
@@ -116,11 +138,15 @@ function validate() {
 }
 
 function process() {
-  var workerCount = document.getElementById("workerCountInput").value;
   // console.log(workerCount);
   
   console.log(area);
   
+  context.font = "15px Consolas";
+  // context.fillStyle = "#6ae786";
+  // context.fillStyle = "#0000ee";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+    
   for (var y = 0; y < canvas.height; y += scale) {
     for (var x = 0; x < canvas.width; x += scale) {
       
@@ -132,24 +158,37 @@ function process() {
       
       var currentValue = getValue(currentPosition.x, currentPosition.y);
       
-      context.fillStyle = "#" + Math.floor((currentValue / 30 * 999999));
+      // context.fillStyle = "#" + Math.floor((currentValue / maxIterations * 999999));
+      // context.fillStyle = "#ee" + Math.floor((currentValue / maxIterations * 99)) + "00";
+      
+      // context.fillStyle = "hsl(" + 180 + (currentValue / maxIterations) * 180 + ", 50%, 30%)";
+      context.fillStyle = "hsl(" + (currentValue / maxIterations) * 360 + ", 75%, 50%)";
+      
+      // if (context.fillStyle == "#000000") {
+      //   console.log(currentValue + "|" + context.fillStyle);
+      // }
+      
+      // if (true || x < 50 && y < 50) {
+        // console.log(x + " " + y + " | " + currentValue);
+      // }
+      // context.fillText(currentValue, x, y);
       
       context.fillRect(x, y, scale, scale);
     }
   }
   
-  context.fillRect(10, 10, 30, 30);
+  // context.fillRect(10, 10, 30, 30);
 }
 
-function getValue(x, y) {
-  var maxIterations = 30;
-  
+function getValue(x, y) {  
   var baseNumber = new Complex(x, y);
   var number = new Complex(x, y);
   
   var iterations = 0;
   
-  while (number.real + number.imag < 4 && iterations < maxIterations) {
+  while (number.length() < maxLength && iterations < maxIterations) {
+    // console.log(number.length());
+    
     number = number.square().add(baseNumber);
     
     iterations++;

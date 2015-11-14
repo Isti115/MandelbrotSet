@@ -17,6 +17,10 @@ Complex.prototype.square = function () {
   return new Complex(Math.pow(this.real, 2) - Math.pow(this.imag, 2), 2 * (this.real * this.imag));
 }
 
+Complex.prototype.length = function () {
+  return Math.pow(Math.pow(this.real, 2) + Math.pow(this.imag, 2), 0.5);
+}
+
 Complex.prototype.toString = function () {
   return this.real + " + " + this.imag + "i";
 }
