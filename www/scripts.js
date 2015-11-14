@@ -110,9 +110,9 @@ function load() {
     document.getElementById("scaleInput").value = splitted[2];
     document.getElementById("areaInput").value = splitted[3];
     
-    configUpdate();
-    
-    // doProcess = true;
+    if (splitted[4] == "autorender") {
+      doProcess = true;
+    }
   } else {
     var preferredArea = {left: -2.5, right: 1.5, top: -1.5, bottom: 1.5};
     
@@ -133,7 +133,11 @@ function load() {
       area.top = preferredArea.top - extraHeight / 2;
       area.bottom = preferredArea.bottom + extraHeight / 2;
     }
+    
+    document.getElementById("areaInput").value = JSON.stringify(area);
   }
+  
+  configUpdate();
   
   context = canvas.getContext("2d");
   
@@ -189,6 +193,7 @@ function dragMove(e) {
   drag.right = e.clientX;
   drag.bottom = e.clientY;
   context.drawImage(tempImage, 0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "rgb(255, 255, 0)";
   context.strokeRect(drag.left, drag.top, drag.right - drag.left, drag.bottom - drag.top);
 }
 
@@ -250,7 +255,7 @@ function validate() {
 }
 
 function between(x, min, max) {
-  return min + ((max - min) * x);
+  return Math.floor(min + ((max - min) * x));
 }
 
 function process() {
@@ -282,31 +287,7 @@ function process() {
       
       // console.log(currentValue);
       
-      // context.fillStyle = "#" + Math.floor((currentValue * 999999));
-      // context.fillStyle = "#ee" + Math.floor((currentValue * 99)) + "00";
-      
-      // context.fillStyle = "hsl(" + 180 + (currentValue) * 180 + ", 50%, 30%)";
-      // context.fillStyle = "hsl(" + (currentValue * 10) * 360 + ", 75%, 50%)";
-      // context.fillStyle = "hsl(" + "115" + ", " + (100 - currentValue * 100) + "%, 50%)";
-      
-      if (currentValue == 1) {
-        var hue = 0, saturation = 0, lightness = 0;
-      } else {
-        var hue = between(currentValue, 0, 360);
-        var saturation = between(currentValue, 0, 100);
-        var lightness = between(currentValue, 50, 100);  
-      }
-      
-      context.fillStyle = "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
-      
-      // if (context.fillStyle == "#000000") {
-      //   console.log(currentValue + "|" + context.fillStyle);
-      // }
-      
-      // if (true || x < 50 && y < 50) {
-        // console.log(x + " " + y + " | " + currentValue);
-      // }
-      // context.fillText(currentIterations, x, y);
+      context.fillStyle = getColor(currentValue);
       
       context.fillRect(x, y, scale, scale);
     }
@@ -330,4 +311,58 @@ function getValue(x, y) {
   }
   
   return iterations;
+}
+
+function getColor(currentValue) {
+  // ### --- Basic RGB --- ### //
+  
+    // context.fillStyle = "#" + Math.floor((currentValue * 999999));
+    // context.fillStyle = "#ee" + Math.floor((currentValue * 99)) + "00";
+  
+  // ### --- Basic HSL --- ### //
+  
+    // context.fillStyle = "hsl(" + 180 + (currentValue) * 180 + ", 50%, 30%)";
+    // context.fillStyle = "hsl(" + (currentValue * 10) * 360 + ", 75%, 50%)";
+    // context.fillStyle = "hsl(" + "115" + ", " + (100 - currentValue * 100) + "%, 50%)";
+  
+  // ### --- Advanced HSL --- ### //
+  
+    // if (currentValue == 1) {
+    //   var hue = 0, saturation = 0, lightness = 0;
+    // } else {
+    //   var hue = between(currentValue, 0, 360);
+    //   var saturation = between(currentValue, 0, 100);
+    //   var lightness = between(currentValue, 50, 100);  
+    // }
+    // 
+    // context.fillStyle = "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
+  
+  // ### --- Advanced RGB --- ### //
+  
+    var baseColor = {r: 0, g: 0, b: 0};
+    var startColor = {r: 0, g: 0, b: 0};
+    var endColor = {r: 0, g: 0, b: 255};
+    
+    if (currentValue == 1) {
+      var currentColor = baseColor;
+    } else {
+      var currentColor = {
+        r: between(currentValue, startColor.r, endColor.r),
+        g: between(currentValue, startColor.g, endColor.g),
+        b: between(currentValue, startColor.b, endColor.b)
+      };
+    }
+    
+    return "rgb(" + currentColor.r + ", " + currentColor.g + ", " + currentColor.b + ")";
+  
+  // ### --- Tests --- ### //
+  
+    // if (context.fillStyle == "#000000") {
+    //   console.log(currentValue + "|" + context.fillStyle);
+    // }
+    
+    // if (true || x < 50 && y < 50) {
+      // console.log(x + " " + y + " | " + currentValue);
+    // }
+    // context.fillText(currentIterations, x, y);
 }
