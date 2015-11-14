@@ -23,7 +23,7 @@ var drag;
 
 var canvas, context;
 
-var scale = 2;
+var scale = 1;
 
 var area = {};
 area.top = 1.5, area.right = 1.5, area.bottom = -1.5, area.left = -2;
@@ -46,7 +46,6 @@ function load() {
   
   output = document.getElementById("output");
   output.addEventListener("mousedown", dragStart, false);
-  output.addEventListener("mouseup", dragEnd, false);
   
   canvas = document.getElementById("outputCanvas");
   
@@ -57,7 +56,12 @@ function load() {
 }
 
 function dragStart(e) {
+  if (e.button != 0) {
+    return;
+  }
+  
   output.addEventListener("mousemove", dragMove, false);
+  output.addEventListener("mouseup", dragEnd, false);
   drag = {left: e.clientX, top: e.clientY};
 }
 
@@ -69,15 +73,29 @@ function dragMove(e) {
 
 function dragEnd(e) {
   output.removeEventListener("mousemove", dragMove, false);
+  output.removeEventListener("mouseup", dragEnd, false);
+  
+  // console.log(drag);
+  
+  var dragResults = {};
+  dragResults.left = drag.left < drag.right ? drag.left : drag.right;
+  dragResults.right = drag.left < drag.right ? drag.right : drag.left;
+  dragResults.top = drag.top < drag.bottom ? drag.top : drag.bottom;
+  dragResults.bottom = drag.top < drag.bottom ? drag.bottom : drag.top;
+  
+  // console.log(dragResults);
   
   var newArea = {};
   
-  newArea.left = area.left + ((area.right - area.left) * (drag.left / canvas.width));
-  newArea.right = area.left + ((area.right - area.left) * (drag.right / canvas.width));
-  newArea.top = area.top + ((area.bottom - area.top) * (drag.top / canvas.width));
-  newArea.bottom = area.top + ((area.bottom - area.top) * (drag.bottom / canvas.width));
+  newArea.left = area.left + ((area.right - area.left) * (dragResults.left / canvas.width));
+  newArea.right = area.left + ((area.right - area.left) * (dragResults.right / canvas.width));
+  newArea.top = area.top + ((area.bottom - area.top) * (dragResults.top / canvas.height));
+  newArea.bottom = area.top + ((area.bottom - area.top) * (dragResults.bottom / canvas.height));
   
   area = newArea;
+  
+  console.log(area);
+  process();
 }
 
 function example() {
@@ -114,7 +132,7 @@ function process() {
       
       var currentValue = getValue(currentPosition.x, currentPosition.y);
       
-      context.fillStyle = "#00" + Math.floor((currentValue / 30 * 9999));
+      context.fillStyle = "#" + Math.floor((currentValue / 30 * 999999));
       
       context.fillRect(x, y, scale, scale);
     }
