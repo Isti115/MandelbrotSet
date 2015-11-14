@@ -26,6 +26,17 @@ var examples = [
     }
   },
   {
+    maxIterations: 300,
+    maxLength: 4,
+    scale: 2,
+    area: {
+      "left":0.26357017389933246,
+      "right":0.2653860003153481,
+      "top":0.002245732060185201,
+      "bottom":0.003922676745756188
+    }
+  },
+  {
     maxIterations: 100,
     maxLength: 4,
     scale: 1,
@@ -134,6 +145,7 @@ function load() {
   
   document.getElementById("areaInput").value = JSON.stringify(area);
   
+  doProcess = true;
   if (doProcess) {
     process();
   }
@@ -264,7 +276,8 @@ function process() {
       // context.fillStyle = "#ee" + Math.floor((currentValue / maxIterations * 99)) + "00";
       
       // context.fillStyle = "hsl(" + 180 + (currentValue / maxIterations) * 180 + ", 50%, 30%)";
-      context.fillStyle = "hsl(" + (currentValue / maxIterations) * 360 + ", 75%, 50%)";
+      // context.fillStyle = "hsl(" + (currentValue / maxIterations) * 360 + ", 75%, 50%)";
+      context.fillStyle = "hsl(" + (currentValue / maxIterations) * 360 + ", " + (100 - (currentValue / maxIterations) * 100) + "%, 50%)";
       
       // if (context.fillStyle == "#000000") {
       //   console.log(currentValue + "|" + context.fillStyle);
