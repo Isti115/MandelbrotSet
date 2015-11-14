@@ -10,6 +10,16 @@ body {
   text-align: center;
 }
 
+h1 {
+  display: inline-block;
+  
+  padding: 10px;
+  
+  border-radius: 10px;
+  
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
 .about {
   position: fixed;
     right: 0px;
@@ -49,24 +59,46 @@ body {
 }
 
 #config:hover {
-  width: 375px;
-  height: 395px;
+  width: 400px;
+  height: 500px;
 }
 
 #configLogo {
-  margin: 0px 0px 5px 0px;
-  font-size: 50px;
+  width: 50px;
+  height: 50px;
+}
+
+#configShare {
+  width: 50px;
+  height: 50px;
+  
+  position: absolute;
+    top: 11px;
+    left: 360px;
+  
+  cursor: pointer;
 }
 
 #config table {
   margin: auto;
 }
 
+#config table td:nth-child(2n + 1) {
+  text-align: right;
+}
+
+.configInput#areaInput {
+  height: 75px;
+  word-break: break-word;
+}
+
 #exampleButton {
+  display: block;
+  
   width: 70%;
   height: 50px;
   
-  margin: 20px;
+  margin: 20px auto 0px auto;
   
   font-family: "Consolas";
   font-size: 30px;
@@ -89,8 +121,6 @@ body {
 #processButton {
   width: 300px;
   height: 100px;
-  
-  margin: 30px;
   
   font-size: 40px;
   font-family: "Consolas";

@@ -3,14 +3,28 @@
 window.addEventListener("load", load, false);
 
 var examples = [
-  //Always TRUE
-  "{A} or not {A}",
-  
-  //Mixed
-  "{this} or {that}",
-  
-  //Always FALSE
-  "{A} and not {A}"
+  {
+    maxIterations: 100,
+    maxLength: 4,
+    scale: 1,
+    area: {
+      "left":-0.4010416,
+      "right":0.1276041,
+      "top":-1.1306532,
+      "bottom":-0.6301507
+    }
+  },
+  {
+    maxIterations: 100,
+    maxLength: 4,
+    scale: 1,
+    area: {
+      "left":-1.815625,
+      "right":-1.709374,
+      "top":-0.069164,
+      "bottom":0.077809
+    }
+  }
 ];
 
 var currentExample = -1;
@@ -26,13 +40,27 @@ var maxLength = 4;
 var scale = 2;
 
 var area = {};
-area.top = 1.5, area.right = 1.5, area.bottom = -1.5, area.left = -2;
+area.top = 1.5; area.right = 1.5; area.bottom = -1.5; area.left = -2;
 area = {left: -1.5, right: -0.5, top: 1.5, bottom: 0.5};
 area = {left: -3, right: 3, top: -3, bottom: 3};
 
 var tempImage = new Image();
 
-function load() {  
+function load() {
+  var doProcess = false;
+  
+  if (location.hash != "") {
+    var raw = location.hash.substr(1);
+    var splitted = raw.split(';');
+    
+    maxIterations = parseInt(splitted[0]);
+    maxLength = parseInt(splitted[1]);
+    scale = parseInt(splitted[2]);
+    area = JSON.parse(splitted[3]);
+    
+    // doProcess = true;
+  }
+  
   var configDiv = document.getElementById("config");
   
   configDiv.addEventListener("mouseover", function(){
@@ -45,12 +73,7 @@ function load() {
   
   document.getElementById("processButton").addEventListener("click", process, false);
   document.getElementById("exampleButton").addEventListener("click", example, false);
-  
-  var configInputs = document.getElementsByClassName("configInput");
-  
-  for (var i = 0; i < configInputs.length; i++) {
-    configInputs[i].addEventListener("change", configUpdate, false);
-  }
+  document.getElementById("configShare").addEventListener("click", share, false);
   
   output = document.getElementById("output");
   output.addEventListener("mousedown", dragStart, false);
@@ -61,6 +84,22 @@ function load() {
   canvas.height = canvas.clientHeight;
   
   context = canvas.getContext("2d");
+  
+  var configInputs = document.getElementsByClassName("configInput");
+  
+  for (var i = 0; i < configInputs.length; i++) {
+    configInputs[i].addEventListener("change", configUpdate, false);
+  }
+  
+  document.getElementById("areaInput").value = JSON.stringify(area);
+  
+  if (doProcess) {
+    process();
+  }
+}
+
+function share() {
+  alert("Feature under development.\nTo share the current view, copy and paste the link from the browser!");
 }
 
 function configUpdate() {
@@ -68,6 +107,9 @@ function configUpdate() {
   maxIterations = parseInt(document.getElementById("maxIterationsInput").value);
   maxLength = parseInt(document.getElementById("maxLengthInput").value);
   scale = parseInt(document.getElementById("scaleInput").value);
+  area = JSON.parse(document.getElementById("areaInput").value);
+  
+  document.getElementById("scaleCounter").innerHTML = "Scale (" + scale + "):";
 }
 
 function dragStart(e) {
@@ -95,7 +137,7 @@ function dragEnd(e) {
   
   // console.log(drag);
   
-  if (Math.abs(drag.right - drag.left) < 25 || Math.abs(drag.bottom - drag.top) < 25) {
+  if (Math.abs(drag.right - drag.left) < 10 || Math.abs(drag.bottom - drag.top) < 10) {
     return;
   }
   
@@ -116,13 +158,16 @@ function dragEnd(e) {
   
   area = newArea;
   
+  document.getElementById("areaInput").value = JSON.stringify(area);
+  
   console.log(area);
   process();
 }
 
 function example() {
-  var input = document.getElementById("inputField");
-  
+  // alert("This function is under construction.");
+  // return;
+
   var random = -1;
   
   do {
@@ -130,7 +175,13 @@ function example() {
   } while (random == currentExample)
   
   currentExample = random;
-  input.value = examples[random];
+  
+  document.getElementById("maxIterationsInput").value = examples[currentExample].maxIterations;
+  document.getElementById("maxLengthInput").value = examples[currentExample].maxLength;
+  document.getElementById("scaleInput").value = examples[currentExample].scale;
+  document.getElementById("areaInput").value = JSON.stringify(examples[currentExample].area);
+  
+  configUpdate();
 }
 
 function validate() {
@@ -139,6 +190,8 @@ function validate() {
 
 function process() {
   // console.log(workerCount);
+  
+  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area);
   
   console.log(area);
   
@@ -176,8 +229,6 @@ function process() {
       context.fillRect(x, y, scale, scale);
     }
   }
-  
-  // context.fillRect(10, 10, 30, 30);
 }
 
 function getValue(x, y) {  
