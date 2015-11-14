@@ -10,9 +10,9 @@
   <div id="shareCodeContainer">
     Paste this link into a browser to share it or bookmark it for future use:
     <br>
-    <p id="shareCode">
+    <textarea id="shareCode">
       
-    </p>
+    </textarea>
   </div>
   <div class="container">
     
@@ -27,7 +27,7 @@
       <img id="configLogo" src="gear.png" />
       <img id="configShare" src="share.png" />
       
-      <table>
+      <table id="configTable">
         <thead>
           <tr><th>Parameter</th><th>Value</th></tr>
         </thead>
@@ -37,7 +37,7 @@
         </tr>
         <tr>
           <td>Max iterations:</td>
-          <td><input class="configInput" id="maxIterationsInput" type="text" value="30"></td>
+          <td><input class="configInput" id="maxIterationsInput" type="text" value="50"></td>
         </tr>
         <tr>
           <td>Maximum length:</td>
@@ -50,6 +50,18 @@
         <tr>
           <td>Area:</td>
           <td><input class="configInput" id="areaInput" type="text" value="4"></td>
+        </tr>
+        <tr>
+          <table id="colorTable">
+            <tr>
+              <td>Base Color</td><td>Begin Color</td><td>End Color</td>
+            </tr>
+            <tr>
+              <td><input class="configInput" id="baseColorInput" type="color" value="#000000"></td>
+              <td><input class="configInput" id="startColorInput" type="color" value="#0000ff"></td>
+              <td><input class="configInput" id="endColorInput" type="color" value="#000055"></td>
+            </tr>
+          </table>
         </tr>
       </table>
       

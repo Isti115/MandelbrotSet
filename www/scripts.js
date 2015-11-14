@@ -68,6 +68,10 @@ area = {left: -3, right: 3, top: -3, bottom: 3};
 area = {left: -2, right: 1, top: -1, bottom: 1};
 area = {left: -2.5, right: 1.5, top: -1.5, bottom: 1.5};
 
+var baseColor = {r: 0, g: 0, b: 0};
+var startColor = {r: 0, g: 0, b: 0};
+var endColor = {r: 0, g: 0, b: 255};
+
 var tempImage = new Image();
 
 function load() {
@@ -110,7 +114,11 @@ function load() {
     document.getElementById("scaleInput").value = splitted[2];
     document.getElementById("areaInput").value = splitted[3];
     
-    if (splitted[4] == "autorender") {
+    document.getElementById("baseColorInput").value = splitted[4];
+    document.getElementById("startColorInput").value = splitted[5];
+    document.getElementById("endColorInput").value = splitted[6];
+    
+    if (splitted[7] == "autorender") {
       doProcess = true;
     }
   } else {
@@ -158,7 +166,11 @@ function load() {
 function share() {
   //alert("Feature under development.\nTo share the current view, copy and paste the link from the browser!");
   
-  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area);
+  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area) + ";" + 
+  document.getElementById("baseColorInput").value + ";" +
+  document.getElementById("startColorInput").value + ";" +
+  document.getElementById("endColorInput").value;
+  
   document.getElementById("shareCode").innerHTML = location.href;
   document.getElementById("shareCodeContainer").style.top = "100px";
 }
@@ -173,9 +185,21 @@ function configUpdate() {
   maxLength = parseInt(document.getElementById("maxLengthInput").value);
   scale = parseInt(document.getElementById("scaleInput").value);
   area = JSON.parse(document.getElementById("areaInput").value);
+  baseColor = hexToRgb(document.getElementById("baseColorInput").value);
+  startColor = hexToRgb(document.getElementById("startColorInput").value);
+  endColor = hexToRgb(document.getElementById("endColorInput").value);
   
   document.getElementById("scaleCounter").innerHTML = "Scale (" + scale + "):";
 }
+
+function hexToRgb(hex) {
+  return {
+    r: parseInt(hex[1] + hex[2], 16),
+    g: parseInt(hex[3] + hex[4], 16),
+    b: parseInt(hex[5] + hex[6], 16)
+  };
+}
+
 
 function dragStart(e) {
   if (e.button != 0) {
@@ -263,7 +287,10 @@ function process() {
   
   document.getElementById("title").innerHTML = "Discrete Mathematics - Mandelbrot Set - Processing";
   
-  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area);
+  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area) + ";" + 
+  document.getElementById("baseColorInput").value + ";" +
+  document.getElementById("startColorInput").value + ";" +
+  document.getElementById("endColorInput").value;
   
   console.log(area);
   
@@ -294,6 +321,8 @@ function process() {
   }
   
   document.getElementById("title").innerHTML = "Discrete Mathematics - Mandelbrot Set";
+  
+  tempImage.src = canvas.toDataURL();
 }
 
 function getValue(x, y) {  
@@ -338,18 +367,14 @@ function getColor(currentValue) {
     // context.fillStyle = "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
   
   // ### --- Advanced RGB --- ### //
-  
-    var baseColor = {r: 0, g: 0, b: 0};
-    var startColor = {r: 0, g: 0, b: 0};
-    var endColor = {r: 0, g: 0, b: 255};
     
     if (currentValue == 1) {
       var currentColor = baseColor;
     } else {
       var currentColor = {
-        r: between(currentValue, startColor.r, endColor.r),
-        g: between(currentValue, startColor.g, endColor.g),
-        b: between(currentValue, startColor.b, endColor.b)
+        r: between(1 - currentValue, startColor.r, endColor.r),
+        g: between(1 - currentValue, startColor.g, endColor.g),
+        b: between(1 - currentValue, startColor.b, endColor.b)
       };
     }
     

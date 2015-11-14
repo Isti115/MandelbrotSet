@@ -23,7 +23,11 @@ body {
 }
 
 #shareCode {
-  overflow-wrap: break-word;
+  /*overflow-wrap: break-word;*/
+  width: 100%;
+  height: 50%;
+  
+  margin-top: 15px;
 }
 
 .container {
@@ -86,7 +90,7 @@ h1 {
 
 #config:hover {
   width: 400px;
-  height: 500px;
+  height: 550px;
 }
 
 #configLogo {
@@ -109,13 +113,19 @@ h1 {
   margin: auto;
 }
 
-#config table td:nth-child(2n + 1) {
+#config table#configTable td:nth-child(2n + 1) {
   text-align: right;
 }
 
 .configInput#areaInput {
   height: 75px;
   word-break: break-word;
+}
+
+#colorTable td {
+  font-size: 15px;
+  margin: 5px;
+  text-align: center;
 }
 
 #exampleButton {
