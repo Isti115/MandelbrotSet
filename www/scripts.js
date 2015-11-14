@@ -15,6 +15,17 @@ var examples = [
     }
   },
   {
+    maxIterations: 500,
+    maxLength: 4,
+    scale: 1,
+    area: {
+      "left":-0.7426271387832698,
+      "right":-0.6898027566539924,
+      "top":-0.32355795226185147,
+      "bottom":-0.26382946117480377
+    }
+  },
+  {
     maxIterations: 100,
     maxLength: 4,
     scale: 1,
@@ -43,6 +54,8 @@ var area = {};
 area.top = 1.5; area.right = 1.5; area.bottom = -1.5; area.left = -2;
 area = {left: -1.5, right: -0.5, top: 1.5, bottom: 0.5};
 area = {left: -3, right: 3, top: -3, bottom: 3};
+area = {left: -2, right: 1, top: -1, bottom: 1};
+area = {left: -2.5, right: 1.5, top: -1.5, bottom: 1.5};
 
 var tempImage = new Image();
 
@@ -53,10 +66,12 @@ function load() {
     var raw = location.hash.substr(1);
     var splitted = raw.split(';');
     
-    maxIterations = parseInt(splitted[0]);
-    maxLength = parseInt(splitted[1]);
-    scale = parseInt(splitted[2]);
-    area = JSON.parse(splitted[3]);
+    document.getElementById("maxIterationsInput").value = splitted[0];
+    document.getElementById("maxLengthInput").value = splitted[1];
+    document.getElementById("scaleInput").value = splitted[2];
+    document.getElementById("areaInput").value = splitted[3];
+    
+    configUpdate();
     
     // doProcess = true;
   }
@@ -71,9 +86,15 @@ function load() {
     configDiv.style.transition = "height 0.7s, width 0.3s ease 0.7s";
   }, false);
   
+  document.getElementById("title").addEventListener("click", function () {
+    location.hash = "";
+    location.reload();
+  }, false);
+  
   document.getElementById("processButton").addEventListener("click", process, false);
   document.getElementById("exampleButton").addEventListener("click", example, false);
   document.getElementById("configShare").addEventListener("click", share, false);
+  document.getElementById("shareCodeContainer").addEventListener("click", shareHide, false);
   
   output = document.getElementById("output");
   output.addEventListener("mousedown", dragStart, false);
@@ -82,6 +103,26 @@ function load() {
   
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
+  
+  var preferredArea = {left: -2.5, right: 1.5, top: -1.5, bottom: 1.5};
+  
+  if (canvas.width / canvas.height > (preferredArea.right - preferredArea.left) / (preferredArea.bottom - preferredArea.top)) {
+    area.top = preferredArea.top;
+    area.bottom = preferredArea.bottom;
+    
+    var totalWidth = (canvas.width / canvas.height) * (preferredArea.bottom - preferredArea.top);
+    var extraWidth = totalWidth - (preferredArea.right - preferredArea.left);
+    area.left = preferredArea.left - extraWidth / 2;
+    area.right = preferredArea.right + extraWidth / 2;
+  } else {
+    area.left = preferredArea.left;
+    area.right = preferredArea.right;
+    
+    var totalHeight = (canvas.height / canvas.width) * (preferredArea.right - preferredArea.left);
+    var extraHeight = totalHeight - (preferredArea.bottom - preferredArea.top);
+    area.top = preferredArea.top - extraHeight / 2;
+    area.bottom = preferredArea.bottom + extraHeight / 2;
+  }
   
   context = canvas.getContext("2d");
   
@@ -99,7 +140,15 @@ function load() {
 }
 
 function share() {
-  alert("Feature under development.\nTo share the current view, copy and paste the link from the browser!");
+  //alert("Feature under development.\nTo share the current view, copy and paste the link from the browser!");
+  
+  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area);
+  document.getElementById("shareCode").innerHTML = location.href;
+  document.getElementById("shareCodeContainer").style.top = "100px";
+}
+
+function shareHide() {
+  document.getElementById("shareCodeContainer").style.top = "-500px";
 }
 
 function configUpdate() {

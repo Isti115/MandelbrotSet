@@ -7,6 +7,13 @@
   <script type="text/javascript" src="scripts.js"></script>
 </head>
 <body>
+  <div id="shareCodeContainer">
+    Paste this link into a browser to share it or bookmark it for future use:
+    <br>
+    <p id="shareCode">
+      
+    </p>
+  </div>
   <div class="container">
     
     <!-- GitHug Fork Banner -->
@@ -19,13 +26,7 @@
     <div id="config">
       <img id="configLogo" src="gear.png" />
       <img id="configShare" src="share.png" />
-      <div id="shareCodeContainer">
-        Paste this link into a browser to share it or bookmark it for future use:
-        <br>
-        <p id="shareCode">
-          
-        </p>
-      </div>
+      
       <table>
         <thead>
           <tr><th>Parameter</th><th>Value</th></tr>
@@ -57,7 +58,7 @@
       <input id="processButton" type="button" value="Process" />
     </div>
     
-    <h1 class="noselect">Discrete Mathematics - Mandelbrot Set</h1>
+    <h1 class="noselect" id="title">Discrete Mathematics - Mandelbrot Set</h1>
     
     <div id="output">
       <canvas id="outputCanvas"></canvas>
