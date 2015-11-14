@@ -159,6 +159,10 @@ h1 {
   border-color: #00ff00;
 }
 
+#processButton:active {
+  border-width: 6px;
+}
+
 #output {
   position: fixed;
     top: 0px;

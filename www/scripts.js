@@ -73,20 +73,6 @@ var tempImage = new Image();
 function load() {
   var doProcess = false;
   
-  if (location.hash != "") {
-    var raw = location.hash.substr(1);
-    var splitted = raw.split(';');
-    
-    document.getElementById("maxIterationsInput").value = splitted[0];
-    document.getElementById("maxLengthInput").value = splitted[1];
-    document.getElementById("scaleInput").value = splitted[2];
-    document.getElementById("areaInput").value = splitted[3];
-    
-    configUpdate();
-    
-    // doProcess = true;
-  }
-  
   var configDiv = document.getElementById("config");
   
   configDiv.addEventListener("mouseover", function(){
@@ -115,24 +101,38 @@ function load() {
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
   
-  var preferredArea = {left: -2.5, right: 1.5, top: -1.5, bottom: 1.5};
-  
-  if (canvas.width / canvas.height > (preferredArea.right - preferredArea.left) / (preferredArea.bottom - preferredArea.top)) {
-    area.top = preferredArea.top;
-    area.bottom = preferredArea.bottom;
+  if (location.hash != "") {
+    var raw = location.hash.substr(1);
+    var splitted = raw.split(';');
     
-    var totalWidth = (canvas.width / canvas.height) * (preferredArea.bottom - preferredArea.top);
-    var extraWidth = totalWidth - (preferredArea.right - preferredArea.left);
-    area.left = preferredArea.left - extraWidth / 2;
-    area.right = preferredArea.right + extraWidth / 2;
+    document.getElementById("maxIterationsInput").value = splitted[0];
+    document.getElementById("maxLengthInput").value = splitted[1];
+    document.getElementById("scaleInput").value = splitted[2];
+    document.getElementById("areaInput").value = splitted[3];
+    
+    configUpdate();
+    
+    // doProcess = true;
   } else {
-    area.left = preferredArea.left;
-    area.right = preferredArea.right;
+    var preferredArea = {left: -2.5, right: 1.5, top: -1.5, bottom: 1.5};
     
-    var totalHeight = (canvas.height / canvas.width) * (preferredArea.right - preferredArea.left);
-    var extraHeight = totalHeight - (preferredArea.bottom - preferredArea.top);
-    area.top = preferredArea.top - extraHeight / 2;
-    area.bottom = preferredArea.bottom + extraHeight / 2;
+    if (canvas.width / canvas.height > (preferredArea.right - preferredArea.left) / (preferredArea.bottom - preferredArea.top)) {
+      area.top = preferredArea.top;
+      area.bottom = preferredArea.bottom;
+      
+      var totalWidth = (canvas.width / canvas.height) * (preferredArea.bottom - preferredArea.top);
+      var extraWidth = totalWidth - (preferredArea.right - preferredArea.left);
+      area.left = preferredArea.left - extraWidth / 2;
+      area.right = preferredArea.right + extraWidth / 2;
+    } else {
+      area.left = preferredArea.left;
+      area.right = preferredArea.right;
+      
+      var totalHeight = (canvas.height / canvas.width) * (preferredArea.right - preferredArea.left);
+      var extraHeight = totalHeight - (preferredArea.bottom - preferredArea.top);
+      area.top = preferredArea.top - extraHeight / 2;
+      area.bottom = preferredArea.bottom + extraHeight / 2;
+    }
   }
   
   context = canvas.getContext("2d");
@@ -145,7 +145,7 @@ function load() {
   
   document.getElementById("areaInput").value = JSON.stringify(area);
   
-  doProcess = true;
+  // doProcess = true;
   if (doProcess) {
     process();
   }
@@ -249,8 +249,14 @@ function validate() {
   
 }
 
+function between(x, min, max) {
+  return min + ((max - min) * x);
+}
+
 function process() {
   // console.log(workerCount);
+  
+  document.getElementById("title").innerHTML = "Discrete Mathematics - Mandelbrot Set - Processing";
   
   location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area);
   
@@ -270,14 +276,28 @@ function process() {
       
       // console.log(currentPosition);
       
-      var currentValue = getValue(currentPosition.x, currentPosition.y);
+      var currentIterations = getValue(currentPosition.x, currentPosition.y);
       
-      // context.fillStyle = "#" + Math.floor((currentValue / maxIterations * 999999));
-      // context.fillStyle = "#ee" + Math.floor((currentValue / maxIterations * 99)) + "00";
+      var currentValue = currentIterations / maxIterations
       
-      // context.fillStyle = "hsl(" + 180 + (currentValue / maxIterations) * 180 + ", 50%, 30%)";
-      // context.fillStyle = "hsl(" + (currentValue / maxIterations) * 360 + ", 75%, 50%)";
-      context.fillStyle = "hsl(" + (currentValue / maxIterations) * 360 + ", " + (100 - (currentValue / maxIterations) * 100) + "%, 50%)";
+      // console.log(currentValue);
+      
+      // context.fillStyle = "#" + Math.floor((currentValue * 999999));
+      // context.fillStyle = "#ee" + Math.floor((currentValue * 99)) + "00";
+      
+      // context.fillStyle = "hsl(" + 180 + (currentValue) * 180 + ", 50%, 30%)";
+      // context.fillStyle = "hsl(" + (currentValue * 10) * 360 + ", 75%, 50%)";
+      // context.fillStyle = "hsl(" + "115" + ", " + (100 - currentValue * 100) + "%, 50%)";
+      
+      if (currentValue == 1) {
+        var hue = 0, saturation = 0, lightness = 0;
+      } else {
+        var hue = between(currentValue, 0, 360);
+        var saturation = between(currentValue, 0, 100);
+        var lightness = between(currentValue, 50, 100);  
+      }
+      
+      context.fillStyle = "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
       
       // if (context.fillStyle == "#000000") {
       //   console.log(currentValue + "|" + context.fillStyle);
@@ -286,11 +306,13 @@ function process() {
       // if (true || x < 50 && y < 50) {
         // console.log(x + " " + y + " | " + currentValue);
       // }
-      // context.fillText(currentValue, x, y);
+      // context.fillText(currentIterations, x, y);
       
       context.fillRect(x, y, scale, scale);
     }
   }
+  
+  document.getElementById("title").innerHTML = "Discrete Mathematics - Mandelbrot Set";
 }
 
 function getValue(x, y) {  
