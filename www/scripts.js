@@ -282,10 +282,6 @@ function validate() {
   
 }
 
-function between(x, min, max) {
-  return Math.floor(min + ((max - min) * x));
-}
-
 function process() {
   // console.log(workerCount);
   
@@ -302,6 +298,15 @@ function process() {
   // context.fillStyle = "#6ae786";
   // context.fillStyle = "#0000ee";
   context.clearRect(0, 0, canvas.width, canvas.height);
+  
+  var generalData = {};
+  
+  generalData.maxLength = maxLength;
+  generalData.maxIterations = maxIterations;
+  
+  generalData.baseColor = baseColor;
+  generalData.startColor = startColor;
+  generalData.endColor = endColor;
   
   var partitionCount = {x: 4, y: 4};
   for (var y = 0; y < partitionCount.y; y++) {
@@ -322,8 +327,7 @@ function process() {
       currentData.area.bottom = currentData.area.top + ((area.bottom - area.top) / partitionCount.y);
       
       // currentData.scale = scale;
-      currentData.maxLength = maxLength;
-      currentData.maxIterations = maxIterations;
+      currentData.general = generalData;
       
       currentWorker.addEventListener("message", workerMessage, false);
       currentWorker.postMessage(currentData);
@@ -357,7 +361,7 @@ function workerMessage(e) {
     var data = e.data.data;
     
     for (var i = 0; i < data.results.length; i++) {
-      context.fillStyle = getColor(data.results[i]);
+      context.fillStyle = data.results[i];
       context.fillRect(data.x + (i * scale), data.startY + (data.currentY * scale), scale, scale);
     }
   }
@@ -386,54 +390,4 @@ function getValue(x, y) {
   }
   
   return iterations;
-}
-
-function getColor(currentValue) {
-  // ### --- Basic RGB --- ### //
-  
-    // context.fillStyle = "#" + Math.floor((currentValue * 999999));
-    // context.fillStyle = "#ee" + Math.floor((currentValue * 99)) + "00";
-  
-  // ### --- Basic HSL --- ### //
-  
-    // context.fillStyle = "hsl(" + 180 + (currentValue) * 180 + ", 50%, 30%)";
-    // context.fillStyle = "hsl(" + (currentValue * 10) * 360 + ", 75%, 50%)";
-    // context.fillStyle = "hsl(" + "115" + ", " + (100 - currentValue * 100) + "%, 50%)";
-  
-  // ### --- Advanced HSL --- ### //
-  
-    // if (currentValue == 1) {
-    //   var hue = 0, saturation = 0, lightness = 0;
-    // } else {
-    //   var hue = between(currentValue, 0, 360);
-    //   var saturation = between(currentValue, 0, 100);
-    //   var lightness = between(currentValue, 50, 100);  
-    // }
-    // 
-    // context.fillStyle = "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
-  
-  // ### --- Advanced RGB --- ### //
-    
-    if (currentValue == 1) {
-      var currentColor = baseColor;
-    } else {
-      var currentColor = {
-        r: between(1 - currentValue, startColor.r, endColor.r),
-        g: between(1 - currentValue, startColor.g, endColor.g),
-        b: between(1 - currentValue, startColor.b, endColor.b)
-      };
-    }
-    
-    return "rgb(" + currentColor.r + ", " + currentColor.g + ", " + currentColor.b + ")";
-  
-  // ### --- Tests --- ### //
-  
-    // if (context.fillStyle == "#000000") {
-    //   console.log(currentValue + "|" + context.fillStyle);
-    // }
-    
-    // if (true || x < 50 && y < 50) {
-      // console.log(x + " " + y + " | " + currentValue);
-    // }
-    // context.fillText(currentIterations, x, y);
 }
