@@ -8,10 +8,10 @@ var examples = [
     maxLength: 4,
     scale: 1,
     area: {
-      "left":-0.4010416,
-      "right":0.1276041,
-      "top":-1.1306532,
-      "bottom":-0.6301507
+      "left": -0.4010416,
+      "right": 0.1276041,
+      "top": -1.1306532,
+      "bottom": -0.6301507
     }
   },
   {
@@ -19,10 +19,10 @@ var examples = [
     maxLength: 4,
     scale: 1,
     area: {
-      "left":-0.7426271387832698,
-      "right":-0.6898027566539924,
-      "top":-0.32355795226185147,
-      "bottom":-0.26382946117480377
+      "left": -0.7426271387832698,
+      "right": -0.6898027566539924,
+      "top": -0.32355795226185147,
+      "bottom": -0.26382946117480377
     }
   },
   {
@@ -30,10 +30,10 @@ var examples = [
     maxLength: 4,
     scale: 2,
     area: {
-      "left":0.26357017389933246,
-      "right":0.2653860003153481,
-      "top":0.002245732060185201,
-      "bottom":0.003922676745756188
+      "left": 0.26357017389933246,
+      "right": 0.2653860003153481,
+      "top": 0.002245732060185201,
+      "bottom": 0.003922676745756188
     }
   },
   {
@@ -41,10 +41,10 @@ var examples = [
     maxLength: 4,
     scale: 1,
     area: {
-      "left":-1.815625,
-      "right":-1.709374,
-      "top":-0.069164,
-      "bottom":0.077809
+      "left": -1.815625,
+      "right": -1.709374,
+      "top": -0.069164,
+      "bottom": 0.077809
     }
   }
 ];
@@ -72,6 +72,7 @@ var baseColor = {r: 0, g: 0, b: 0};
 var startColor = {r: 0, g: 0, b: 0};
 var endColor = {r: 0, g: 0, b: 255};
 
+var activeWorkerCount = 0;
 var tempImage = new Image();
 
 function load() {
@@ -90,6 +91,10 @@ function load() {
   document.getElementById("title").addEventListener("click", function () {
     location.hash = "";
     location.reload();
+  }, false);
+  
+  document.getElementById("author").addEventListener("click", function () {
+    context.drawImage(tempImage, 0, 0, canvas.width, canvas.height);
   }, false);
   
   document.getElementById("processButton").addEventListener("click", process, false);
@@ -200,7 +205,6 @@ function hexToRgb(hex) {
   };
 }
 
-
 function dragStart(e) {
   if (e.button != 0) {
     return;
@@ -297,32 +301,74 @@ function process() {
   context.font = "15px Consolas";
   // context.fillStyle = "#6ae786";
   // context.fillStyle = "#0000ee";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-    
-  for (var y = 0; y < canvas.height; y += scale) {
-    for (var x = 0; x < canvas.width; x += scale) {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  
+  var partitionCount = {x: 4, y: 4};
+  for (var y = 0; y < partitionCount.y; y++) {
+    for (var x = 0; x < partitionCount.x; x++) {
+      var currentWorker = new Worker("worker.js");
       
-      var currentPosition = {};
-      currentPosition.x = area.left + ((area.right - area.left) * (x / canvas.width));
-      currentPosition.y = area.top  + ((area.bottom - area.top) * (y / canvas.height));
+      var currentData = {};
+      
+      currentData.x = (canvas.width / partitionCount.x) * x;
+      currentData.y = (canvas.height / partitionCount.y) * y;
+      currentData.width = canvas.width / partitionCount.x / scale;
+      currentData.height = canvas.height / partitionCount.y / scale;
+      
+      currentData.area = {};
+      currentData.area.left = area.left + ((area.right - area.left) / partitionCount.x) * x;
+      currentData.area.right = currentData.area.left + ((area.right - area.left) / partitionCount.x);
+      currentData.area.top = area.top + ((area.bottom - area.top) / partitionCount.y) * y;
+      currentData.area.bottom = currentData.area.top + ((area.bottom - area.top) / partitionCount.y);
+      
+      // currentData.scale = scale;
+      currentData.maxLength = maxLength;
+      currentData.maxIterations = maxIterations;
+      
+      currentWorker.addEventListener("message", workerMessage, false);
+      currentWorker.postMessage(currentData);
+      
+      activeWorkerCount++;
+      
+      // currentPosition.x = area.left + ((area.right - area.left) * (x / canvas.width));
+      // currentPosition.y = area.top  + ((area.bottom - area.top) * (y / canvas.height));
       
       // console.log(currentPosition);
       
-      var currentIterations = getValue(currentPosition.x, currentPosition.y);
+      // var currentIterations = getValue(currentPosition.x, currentPosition.y);
       
-      var currentValue = currentIterations / maxIterations
+      // var currentValue = currentIterations / maxIterations;
       
       // console.log(currentValue);
       
-      context.fillStyle = getColor(currentValue);
+      // context.fillStyle = getColor(currentValue);
       
-      context.fillRect(x, y, scale, scale);
+      // context.fillRect(x, y, scale, scale);
     }
   }
   
   document.getElementById("title").innerHTML = "Discrete Mathematics - Mandelbrot Set";
   
-  tempImage.src = canvas.toDataURL();
+  // tempImage.src = canvas.toDataURL();
+}
+
+function workerMessage(e) {
+  if (e.data.type == "results") {
+    var data = e.data.data;
+    
+    for (var i = 0; i < data.results.length; i++) {
+      context.fillStyle = getColor(data.results[i]);
+      context.fillRect(data.x + (i * scale), data.startY + (data.currentY * scale), scale, scale);
+    }
+  }
+  
+  if (e.data.type == "finished") {
+    activeWorkerCount--;
+    
+    if (activeWorkerCount == 0) {
+      tempImage.src = canvas.toDataURL();
+    }
+  }
 }
 
 function getValue(x, y) {  

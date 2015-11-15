@@ -1,26 +1,61 @@
 "use strict";
 
-var Complex = function (real, imag) {
-  this.real = real;
-  this.imag = imag;
+importScripts("complex.js");
+
+self.addEventListener("message", message, false);
+
+var x, y, width, height, area, maxLength, maxIterations;
+
+function message(e) {
+  // console.log("worker created at:" + e.data.x + " | " + e.data.y);
+  // console.log(e.data);
+  
+  var data = e.data;
+  
+  x = data.x;
+  y = data.y;
+  width = data.width;
+  height = data.height;
+  area = data.area;
+  maxLength = data.maxLength;
+  maxIterations = data.maxIterations;
+  
+  processData();
+  
+  // console.log("can I even haz this in worker??? :D");
+  // self.postMessage(data);
 }
 
-Complex.prototype.add = function (z) {
-  return new Complex(this.real + z.real, this.imag + z.imag);
+function processData() {
+  for (var y = 0; y < height; y++) {
+    var values = [];
+    var currentY = area.top + (((area.bottom - area.top) / height) * y);
+    for (var x = 0; x < width; x++) {
+      var currentX = area.left + (((area.right - area.left) / width) * x);
+      
+      values[x] = getValue(currentX, currentY) / maxIterations;
+    }
+    
+    var toSend = {type: "results", data: {x: self.x, startY: self.y, currentY: y, results: values}};
+
+    self.postMessage(toSend);
+  }
+  
+  self.postMessage({type: "finished"});
 }
 
-Complex.prototype.multiply = function (z) {
-  return new Complex((this.real * z.real) - (this.imag * z.imag), (this.real * z.imag) + (this.real * z.imag));
-}
-
-Complex.prototype.square = function () {
-  return new Complex(Math.pow(this.real, 2) - Math.pow(this.imag, 2), 2 * (this.real * this.imag));
-}
-
-Complex.prototype.length = function () {
-  return Math.pow(Math.pow(this.real, 2) + Math.pow(this.imag, 2), 0.5);
-}
-
-Complex.prototype.toString = function () {
-  return this.real + " + " + this.imag + "i";
+function getValue(x, y) {
+  var baseNumber = new Complex(x, y);
+  var number = new Complex(x, y);
+  
+  var iterations = 0;
+  
+  while (number.length() < maxLength && iterations < maxIterations) {    
+    number = number.square().add(baseNumber);
+    
+    iterations++;
+  }
+  
+  // console.log(x + "|" + y + " --> " + iterations);
+  return iterations;
 }
