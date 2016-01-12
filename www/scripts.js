@@ -171,10 +171,10 @@ function load() {
 function share() {
   //alert("Feature under development.\nTo share the current view, copy and paste the link from the browser!");
   
-  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area) + ";" + 
+  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area) + ";" +
   document.getElementById("baseColorInput").value + ";" +
   document.getElementById("startColorInput").value + ";" +
-  document.getElementById("endColorInput").value;
+  document.getElementById("endColorInput").value + ";autorender";
   
   document.getElementById("shareCode").innerHTML = location.href;
   document.getElementById("shareCodeContainer").style.top = "100px";
@@ -287,7 +287,7 @@ function process() {
   
   document.getElementById("title").innerHTML = "Discrete Mathematics - Mandelbrot Set - Processing";
   
-  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area) + ";" + 
+  location.hash = maxIterations + ";" + maxLength + ";" + scale + ";" + JSON.stringify(area) + ";" +
   document.getElementById("baseColorInput").value + ";" +
   document.getElementById("startColorInput").value + ";" +
   document.getElementById("endColorInput").value;
@@ -362,7 +362,7 @@ function workerMessage(e) {
     
     for (var i = 0; i < data.results.length; i++) {
       context.fillStyle = data.results[i];
-      context.fillRect(data.x + (i * scale), data.startY + (data.currentY * scale), scale, scale);
+      context.fillRect(data.x + (i * scale), data.startY + (data.currentY * scale), scale + 1, scale + 1);
     }
   }
   
@@ -375,7 +375,7 @@ function workerMessage(e) {
   }
 }
 
-function getValue(x, y) {  
+function getValue(x, y) {
   var baseNumber = new Complex(x, y);
   var number = new Complex(x, y);
   
